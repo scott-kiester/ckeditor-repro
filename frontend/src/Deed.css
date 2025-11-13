@@ -1,0 +1,1267 @@
+/* This file is used by the React code when it is displaying documents in CKEditor. It's also used by Prince when converting those
+ * documents to PDF.
+ */
+
+:root {
+    --ck-content-line-height:1;
+    --ck-content-font-family: 'Times New Roman', Times, serif;
+}
+
+/*****************************************************************************
+ * CKEditor classes
+ */
+
+/* NOTE: Do not add height-constraints or y-overflow characteristics to the CKEditor containers, or you may break smooth pagination
+ * scrolling. When broken, the pagination lines will only update when the user clicks in the document, and not when moving the scrollbar.
+ * 
+ * Also, setting the font size breaks pagination. I suspect there are only certain specific sizes that CKEditor officially supports,
+ * but that's still just a guess at this point. It's based on the fact that there are only five or so sizes that they make available
+ * to the user, and also by the fact that they'll ignore certain font size attributes in HTML.
+ */
+
+/* Values used internally by CKEditor. */
+.ck-editor {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 100%;
+}
+
+.ck.ck-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 100%;
+}
+
+.ck.ck-editor-top {
+    flex: 0 0 auto;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #ddd;
+}
+
+.ck.ck-editor-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.ck-editor__top {
+    flex: 0 0 auto;
+    z-index: 1;
+}
+
+.ck-editor__main {
+    flex: 1 1 auto;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow-y: hidden;
+}
+
+.ck-editor__editable {
+    margin: 0 !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    max-height: none;
+}
+
+/* Ensure Pagination respects the height in it's "shadow DOM". */
+.ck-pagination-view .ck-editor__editable,
+.ck-editor__editable_inline {
+    height: auto !important;
+    overflow-y: visible !important;
+}
+
+/* This breaks pagination scrolling. */
+.ck-editor__editable_inline {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.ck-source-editing-area textarea {
+    height: 100% !important;
+    min-height: 0;
+    overflow: auto !important;
+    white-space: pre;
+}
+
+/* Style for the pagination page separator */
+.ck-editor__editable .ck-pagination-separator {
+    display: block !important;
+    border-top: 2px dashed #999;
+    position: relative;
+    margin: 1rem 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ck-toolbar-container {
+    flex-shrink: 0;
+    border-bottom: 1px solid #ddd;
+    background: white;
+    z-index: 3;
+    position: relative;
+}
+
+/* Ensure separators don't appear in toolbar */
+.ck-toolbar-container .ck-pagination-separator {
+    display: none !important;
+}
+
+/* These ck-content blocks will affect various elements in both of the editor and the Print Preview option */
+.ck-content {
+    font-size: 11pt; /* This breaks pagination. */
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.ck-content .fl-deed {
+    margin: 1in;
+    margin-top: 1.5in;
+    margin-bottom: 1.5in;
+}
+
+.ck-content .fl-deed p,
+.ck-content .fl-deed div {
+    margin: 0
+}
+
+.ck-content .ca-deed {
+    margin-right: 0.94in;
+    /* Unsure as to what these values should be... */
+    margin-left: 1in;
+    margin-top: 1in;
+    margin-bottom: 1in;
+}
+
+.ck-content .default-deed {
+    margin: 1in;
+}
+
+.ck-content .ca-funding-instructions {
+    margin-right: 0.5in;
+    margin-left: 0.5in;
+    margin-top: 1in;
+    margin-bottom: 1in;
+}
+
+.ck-content .ca-funding-instructions figure.table.full-table td,
+.ck-content .ca-funding-instructions div.screenpage p.title {
+    font-size: 12pt;
+    line-height: 1.1 !important;
+}
+
+.ca-funding-instructions .ca-fi-step-col {
+    width: 15%;
+}
+
+.ca-funding-instructions .ca-fi-instructions-col {
+    width: 85%;
+}
+
+/* Hack for the CA funding instructions. Might need to re-think some of these styles and positionInstructionWindow() in 
+ * CKEditorAttentionBox.ts if we ever have other highlighted text that needs to have this style to look right.
+ */
+.ck-content .ca-funding-instructions td p .attention {
+    display: inline !important;
+}
+
+.ck-content .ca-deed p,
+.ck-content .ca-deed div {
+    margin: 0
+}
+
+.ck-content .pcor-form-heading {
+    font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 20px 0 0 0 !important;
+}
+
+.ck-content .pcor-form-body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    padding-top: 0;
+    margin: 0 0 0 0 !important;
+    font-size: 8pt;
+}
+
+.ck-content .pcor-form-body p {
+    padding-top: 0.25em;
+    margin: 0 0 0 0;
+    font-size: 8pt;
+}
+
+.ck-content .pcor-form-body-sd {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    padding-top: 0;
+    margin: 0 0 0 0 !important;
+    font-size: 8pt;
+}
+
+.ck-content .pcor-form-body-sd p {
+    padding-top: 0.25em;
+    margin: 0 0 0 0;
+    font-size: 8pt;
+}
+
+.ck-content .pcor-form p {
+    margin: 0 0 0 0;
+    padding: 0;
+}
+
+.ck-content .pcor-form {
+    font-size: 8pt;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 20px 0 0 0 !important;
+}
+
+.ck-content .pcor-form-body p.other-info {
+    font-size: 8pt;
+    text-align: left;
+    display: flow-root;
+} 
+
+.ck-content .floating-header {
+    float: left;
+    width: 55%;
+    padding-top: 20px;
+    line-height: 1.5;
+}
+
+.ck-content .floating-header-right {
+    float: right;
+    width: 55%;
+    height: 2.5in;
+    padding-right: 4em;
+    padding-top: 20px;
+    line-height: 1.5;
+}
+
+.ck-content .floating-header-small {
+    float: left;
+    font-size: 8pt;
+    width: 50%;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.ck-content .floating-header-sd {
+    float: left;
+    font-size: 8pt;
+    width: 55%;
+    margin-bottom: 0;
+    padding-right: 0;
+    padding-top: 20px;
+    line-height: 1.5;
+}
+
+.ck-content .header-small {
+    font-size: 8pt;
+    margin-bottom: 10px;
+    padding-right: 4em;
+    padding-top: 20px;
+    line-height: 1.5;
+}
+
+.ck-content .screenpage-pagebreak {
+    break-before: page;
+}
+
+.ck-editor__editable .screenpage-pagebreak {
+    display: block !important;
+    width: 100%;
+    border-top: 2px dashed #999;
+    margin: 2rem 0;
+    position: relative;
+}
+
+.ck-editor__editable .screenpage-pagebreak::before {
+    content: "Page Break";
+    font-size: 0.75rem;
+    color: #666;
+    text-align: center;
+    position: absolute;
+    top: -1.2rem;
+    left: 50%;
+    background: #fff;
+    padding: 0 0.5rem;
+}
+
+.ck-content .deed-body {
+    margin: 0;
+}
+
+.ck-content .vesting-lang {
+    font-weight: bold;
+    margin: 0;
+}
+
+.ck-content .small {
+    font-size: 9pt;
+    text-align: center;
+}
+
+.ck-content .small-border {
+    font-size: 9pt;
+    text-align: left;
+    border: 1px solid black;
+}
+
+.ck-content .tiny {
+    font-size: 8pt;
+    text-align: left;
+    border-bottom: 1px solid black;
+}
+
+.ck-content .legal-desc {
+    margin-left: 4em;
+    font-weight: bold;
+}
+
+.ck-content p.title {
+    text-align: center;
+    font-weight: bold;
+}
+
+.ck-content .courier {
+    font-size: 8pt;
+    font-family: "Courier New", Courier, monospace;
+}
+
+.ck-content p.padded {
+    padding-left: 60px;
+    line-height: 1;
+}
+
+.ck-content p.padded-title {
+    padding-left: 450px;
+    line-height: 1;
+    font-size: 8pt;
+}
+
+.ck-content p.assessor-title {
+    padding-left: 500px;
+    line-height: 1;
+    min-height: 1.2in;
+}
+
+.ck-content p.padded-right {
+    padding-right: 100;
+    text-align: justify;
+    font-size: 8pt;
+    line-height: 1;
+    margin-bottom: 0;
+    width: 90%;
+}
+
+.ck-content p.top-border {
+    font-size: 8pt;
+    text-align: left;
+    border-top: 1px solid black;
+    display: flow-root;
+    margin-left: 55%; /* Match the end of the floating header, so that the formatting is the same for the email line as in the Print Preview */
+
+}
+
+.ck-content p.top-border-napa {
+    font-size: 8pt;
+    text-align: left;
+    border-top: 1px solid black;
+    display: flow-root;
+    margin-left: 55%;
+    /* Match the end of the floating header, so that the formatting is the same for the email line as in the Print Preview */
+    margin-top: 1.5in;
+}
+
+.ck-content p.right-side-sd {
+    margin-left: 55%;
+    margin-bottom: 0.33in;
+    text-align: center;
+}
+
+.ck-content p.top-border-sd {
+    font-size: 8pt;
+    text-align: left;
+    border-top: 1px solid black;
+    display: flow-root;
+    margin-right: 55%;
+    margin-top: 0;
+}
+
+.ck-content p.top-border-full {
+    font-size: 8pt;
+    text-align: left;
+    border-top: 1px solid black;
+    display: flow-root;
+}
+
+.ck-content p.top-bottom {
+    font-size: 8pt;
+    text-align: left;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.ck-content .pcor-form-body p.subtitle {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.ck-content .pcor-form-body .center {
+    font-size: 8pt;
+    font-style: italic;
+    padding-left: 75px;
+    vertical-align: top;
+}
+
+.ck-content .pcor-form-body .i-padded {
+    font-style: italic;
+    padding-left: 45px;
+    vertical-align: top;
+}
+
+.ck-content .inline-checkbox {
+    display: inline-block;
+    align-items: center;
+    padding: 0 10px 5px 0;
+}
+
+/* Tables are tricky and there are a couple differentblocks needed to get everything we need formatted nicely */
+.ck-content .right-table-wrapper {
+    text-align: right !important;
+}
+
+.ck-content figure.table.right-table {
+    margin: 1rem 0 1rem auto !important;
+    float: none !important;
+    display: inline-block !important;
+    width: fit-content !important;
+    max-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5em;
+}
+
+.ck-content figure.table.right-table table {
+    border-collapse: separate !important;
+    border-spacing: 0 0em !important;
+    /* vertical gap between rows */
+    width: auto !important;
+    table-layout: auto !important;
+}
+
+.ck-content figure.table.right-table td {
+    padding: 0.2em 0.2em 0 0 !important;
+    min-height: 1em !important;
+    line-height: 1 !important;
+    vertical-align: bottom !important;
+    white-space: normal !important;
+    text-align: left !important;
+}
+
+.ck-content figure.table.left-table {
+    margin: 1rem 0 !important;
+    float: none !important;
+    display: block !important;
+    width: fit-content !important;
+    max-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5em;
+}
+
+.ck-content figure.table.left-table table {
+    border-collapse: separate !important;
+    border-spacing: 0 0em !important;
+    /* vertical gap between rows */
+    width: auto !important;
+    table-layout: auto !important;
+}
+
+.ck-content figure.table.left-table td {
+    padding: 0.5em 0.2em 0 0 !important;
+    min-height: 1em !important;
+    line-height: 1 !important;
+    vertical-align: bottom !important;
+    white-space: normal !important;
+}
+
+.ck-content figure.table.left-table {
+    float: none !important;
+    display: block !important;
+    width: fit-content !important;
+    max-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1em;
+}
+
+.ck-content figure.table.full-table table {
+    font-size: 11pt;
+    border: none !important;
+    width: 100% !important;
+    /* full width only for full-table */
+    table-layout: auto;
+    /* distribute columns evenly */
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+/* Table cells for full-table only */
+.ck-content figure.table.full-table td,
+.ck-content figure.table.full-table th {
+    border-top: none !important;
+    line-height: 100% !important;
+    padding: 0.5em 0.2em 0 0;
+    /* consistent spacing */
+    vertical-align: top;
+}
+
+.ck-content figure.table table {
+    border: none !important;
+}
+
+.ck-content figure.table td,
+.ck-content figure.table th {
+    border: none !important;
+    line-height: 50%;
+    overflow: visible; /* Prevent attention instruction popovers from being clipped in tables */
+}
+
+.ck-content figure.table.pcor-table {
+    border: none !important;
+    width: 100% !important;
+    margin: 0;
+    padding: 0;
+}
+
+.ck-content figure.table.pcor-table-spacious {
+    border: none !important;
+    width: 100% !important;
+    margin: 0;
+    padding: 0;
+}
+
+.ck-content figure.table.pcor-table table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.ck-content figure.table.pcor-table-spacious table {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.ck-content figure.table.pcor-table tr.indented-table-row {
+    margin-left: 15px;
+}
+
+.ck-content figure.table.pcor-table td,
+.ck-content figure.table.pcor-table th {
+    border: none !important;
+    white-space: nowrap;
+    width: fit-content !important;
+    vertical-align: top;
+}
+
+.ck-content figure.table.pcor-table-spacious td,
+.ck-content figure.table.pcor-table-spacious th {
+    font-size: 8pt;
+    border: none !important;
+    white-space: nowrap;
+    width: fit-content !important;
+    vertical-align: top;
+}
+
+.ck-content figure.table.pcor-table td.text-cell,
+.ck-content figure.table.pcor-table th.text-cell {
+    font-size: 8pt;
+    white-space: normal;
+    line-height: 100%;
+    vertical-align: top;
+    padding: 5px 0 0 0 !important;
+    margin: 0 !important;
+}
+
+.ck-content figure.table.pcor-table td.text-cell-small,
+.ck-content figure.table.pcor-table th.text-cell-small {
+    border: none !important;
+    line-height: 100%;
+}
+
+.ck-content figure.table.pcor-table td.text-cell-right,
+.ck-content figure.table.pcor-table th.text-cell-right {
+    font-size: 8pt;
+    text-align: right;
+    padding: 5px 5px 0 0 !important;
+    vertical-align: top;
+    border: none !important;
+    width: 1px;
+    line-height: 100%;
+}
+
+.ck-content figure.table.pcor-table td.centered-cell,
+.ck-content figure.table.pcor-table th.centered-cell {
+    text-align: center;
+    vertical-align: top;
+    padding: 5px 0 0 0 !important;
+    margin: 0 !important;
+    width: 1px;
+    white-space: nowrap;
+}
+
+.ck-content figure.table.pcor-table td.label-cell,
+.ck-content figure.table.pcor-table th.label-cell {
+    vertical-align: top;
+    padding: 5px 0 0 0 !important;
+    margin: 0 !important;
+    width: 1px;
+    white-space: nowrap;
+    font-size: 8pt;
+}
+
+.ck-content figure.table.pcor-table-spacious td.text-cell,
+.ck-content figure.table.pcor-table-spacious th.text-cell {
+    font-size: 8pt;
+    white-space: normal;
+    line-height: 100%;
+    vertical-align: top;
+    padding: 10px 0 0 0 !important;
+    margin: 0 !important;
+}
+
+.ck-content figure.table.pcor-table-spacious td.text-cell-small,
+.ck-content figure.table.pcor-table-spacious th.text-cell-small {
+    font-size: 8pt;
+    border: none !important;
+    line-height: 100%;
+}
+
+.ck-content figure.table.pcor-table-spacious td.centered-cell,
+.ck-content figure.table.pcor-table-spacious th.centered-cell {
+    font-size: 8pt;
+    text-align: center;
+    vertical-align: top;
+    padding: 10px 0 0 0 !important;
+    margin: 0 !important;
+    width: 1px;
+    white-space: nowrap;
+}
+
+.ck-content figure.table.pcor-table-spacious td.label-cell,
+.ck-content figure.table.pcor-table-spacious th.label-cell {
+    vertical-align: top;
+    padding: 12px 0 0 0 !important;
+    margin: 0 !important;
+    width: 1px;
+    white-space: nowrap;
+}
+
+.ck-content .explain {
+    display: inline-flex;
+    width: 100%;
+}
+
+.ck-content .underline-til-end {
+    flex: 1;
+    border-bottom: 1px solid black;
+}
+
+.page-break {
+    display: block;
+    width: 100%;
+    border-top: 2px dashed #999;
+    margin: 2rem 0;
+    position: relative;
+}
+
+.page-break__label {
+    font-size: 0.75rem;
+    color: #666;
+    text-align: center;
+    position: absolute;
+    top: -1.2rem;
+    left: 50%;
+    background: #fff;
+    padding: 0 0.5rem;
+}
+
+/* Ensure page breaks are visible in the editor */
+.ck-editor__editable .ck-pagination-page-break {
+    display: block !important;
+    page-break-after: always;
+    break-after: page;
+    height: 0;
+    margin: 2rem 0;
+    border-top: 2px dashed #999;
+    position: relative;
+}
+
+/* Label for page breaks */
+.ck-editor__editable .ck-pagination-page-break::before,
+.ck-editor__editable .ck-pagination-separator::before {
+    content: "Page break";
+    font-size: 0.75rem;
+    color: #666;
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    background: white;
+    padding: 0 0.5rem;
+}
+
+/* PCOR Formatting */
+.ck-content .form-row {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 0.5em;
+}
+
+.ck-content .form-row-padded {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 0.5em;
+    padding-left: 15px;
+    font-size: 8pt;
+}
+
+.ck-content .form-row-indented {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 0.5em;
+    margin-left: 30px;
+    font-size: 8pt;
+}
+
+.ck-content .top-row {
+    display: flex;
+    align-items: flex-start;
+    padding-top: 0;
+}
+
+.ck-content .top-row-la {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid black;
+    padding-top: 0;
+}
+
+.ck-content .form-boxes {
+    padding-top: 0.5em;
+    font-size: 8pt;
+}
+
+.ck-content .la-info-box {
+    flex: 0 0 25%;
+    height: 1in;
+    text-align: center;
+    font-size: 8pt;
+}
+
+.ck-content .recorder-box {
+    flex: 0 0 70%;
+    height: 1.5in;
+    border: 4px solid black;
+    text-align: center;
+    font-size: 8pt;
+    margin-right: 0.5em;
+}
+
+.ck-content p.top-border-recorder {
+    border-top: 1px solid black;
+    text-align: center;
+    margin: 0;
+    font-size: 8pt;
+    display: flow-root;
+
+}
+
+.ck-content .body-boxes {
+    padding: 0.5em;
+}
+
+.ck-content .letter-boxes {
+    width: 1px;
+    white-space: nowrap;
+}
+
+.ck-content .form-text {
+    flex: 1;
+    padding-left: 1em;
+    padding-top: 0.5em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-unpadded {
+    flex: 1;
+    padding-top: 0.5em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-long {
+    flex: 0 0 60%;
+    padding-left: 1em;
+    font-size: 8pt;
+    width: 75%;
+    padding-top: 0.5em;
+}
+
+.ck-content .form-text-tight {
+    flex: none;
+    padding-left: 1em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-full {
+    flex: 1;
+    padding-left: 1em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-full-indented {
+    flex: 1;
+    text-indent: -1em;
+    padding-left: 2em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-half {
+    flex: 0 0 50%;
+    padding-left: 1em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-quarter {
+    flex: 0 0 25%;
+    padding-left: 1em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-small {
+    flex: 1;
+    padding-left: 1em;
+    font-size: 8pt;
+}
+
+.ck-content .form-text-thirty {
+    flex: 0 0 30%;
+    padding-left: 1em;
+    font-size: 8pt;
+}
+
+.ck-content .date-inputs {
+    display: flex;
+    min-width: 120px;
+    font-size: 10pt;
+    border-bottom: 1px solid black;
+    padding-top: 0;
+}
+
+.ck-content .date-inputs div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-right: 5px;
+    border-left: 1px solid black;
+    display: flow-root;
+}
+
+.ck-content .address-inputs div.address {
+    border-left: none;
+    width: 55%;
+}
+
+.ck-content .address-inputs {
+    display: flex;
+    min-width: 120px;
+    font-size: 10pt;
+    border-bottom: 1px solid black;
+    padding-top: 0;
+}
+
+.ck-content .address-inputs div {
+    display: flex;
+    flex-direction: column;
+    align-items: left; /* Why was this originally set to center? */
+    margin-right: 5px;
+    border-left: 1px solid black;
+    display: flow-root;
+}
+
+.ck-content p.add-info-title {
+    text-align: center;
+    font-size: 10pt;
+}
+
+.ck-content p.body-paragraph {
+    text-align: justify;
+    font-size: 8.5pt;
+    margin-top: 0.5em;
+    line-height: 1.2;
+    margin-right: 20px;
+}
+
+.ck-content p.indent-paragraph {
+    text-align: justify;
+    font-size: 8pt;
+    margin-top: 0.5em;
+    line-height: 1.2;
+    margin-left: 0.25in;
+    margin-right: 20px;
+}
+
+.ck-content p.indent-paragraph-small {
+    text-align: right;
+    font-size: 8pt;
+    border-bottom: 1px solid black;
+}
+
+.ck-content p.body-subtitle {
+    margin-top: 0.5em;
+    font-size: 8pt;
+    font-weight: bold;
+}
+
+/*****************************************************************************
+ * AttentionBox classes
+ */
+
+.attention {
+    border: 1px solid;
+    padding: 2px 4px;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    border-radius: 3px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.attention-red {
+    --attention-bg: #f6aaa1;
+    --attention-border: #f44336;
+    background-color: #f47167 !important;
+    border: 1px solid #ff1200 !important;
+}
+
+.attention-yellow {
+    --attention-bg: #fffde7;
+    --attention-border: #fdd835;
+    background-color: #fffabe !important;
+    border: 1px solid #ffd000 !important;
+}
+
+.attention-green {
+    --attention-bg: #b1ffb0;
+    --attention-border: #4caf50;
+    background-color: #46ff4e !important;
+    border: 1px solid #008706 !important;
+}
+
+/* Make the above colors apply to buttons, which are used with the 'margin' attribute for select boxes. */
+.ck .ck-button[class*="attention-"] {
+    background: var(--attention-bg);
+    border-color: var(--attention-border);
+}
+
+.attention-instructions {
+    all: initial; /* Don't inherit the formatting from parent elements. */
+    display: none;
+    background-color: var(--attention-bg);
+    border: 1px solid var(--attention-border);
+    padding: 6px 10px;
+    margin-top: 6px;
+    font-size: 10pt;
+    line-height: 1.25;
+    user-select: text;
+    max-width: 50vw;
+    width: max-content;
+    user-select: text;
+    box-sizing: border-box;
+    border-radius: 3px;
+    position: relative;
+    top: 100%;
+    left: 0;
+    z-index: 0;
+
+    /* Ensure content wraps properly within the container */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.attention-instructions select {
+    /* Make select elements responsive by default */
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.attention .attention-instructions.show {
+    display: block;
+}
+
+/* Tell Prince not to include the damnd thing in the PDF, since it ignores the 'hidden' class. */
+.attention-hidden {
+    display: none;
+}
+
+/* This is for "margin buttons", which don't have highlighted text. We don't want the highlighted text box to be visible, because it will
+ * be empty. However, we still need the attention-instructions element to be displayed when the user clicks the button.
+ */
+.ck-content .attention.attention-margin-button {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+select.attention-options {
+    border: 1px solid;
+    border-radius: 4px;
+}
+
+/*****************************************************************************
+ * "Radio" checkboxes: <span> elements that behave like radio buttons and look like checkboxes.
+ * These give us the "only one item per group selected" functionality, with appearance that still matches the checkboxes that are expected 
+ * to appear on forms. 
+ */
+
+.radio-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 10px; /* Fixed size for parent */
+    height: 10px;
+    vertical-align: top;
+}
+.radio-checkbox-input {
+    width: 10px;
+    height: 10px;
+    border: 1px solid black;
+    background-color: white;
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    box-sizing: border-box; /* Ensure border doesn't affect size */
+}
+
+.radio-checkbox-checkmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    width: 10px;
+    height: 10px;
+    font-size: 8pt; /* Size of ✔ */
+    line-height: 10px; /* Center vertically */
+    text-align: center; /* Center horizontally */
+    color: black;
+    pointer-events: none; /* Allow clicks to pass through */
+    display: none; /* Hidden unless checked */
+}
+
+.radio-checkbox input.radio-checkbox-input {
+    width: 10px;
+    height: 10px;
+    border: 1px solid black;
+    background-color: white;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.radio-checkbox .radio-checkbox-checkmark {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    /* 
+    I do not know why the translate value needs to be so high, but with position absolute, 
+    the FL Quitclaim deed is different than the PCOR Forms, probably because of the elements they are wrapped in?
+    The relative gets them to require the same values
+     */
+    transform: translate(-50%, -200%); 
+    width: 70%;
+    /* slightly smaller than checkbox */
+    height: 70%;
+    color: black;
+    font-size: 8px;
+    line-height: 1;
+}
+
+.radio-checkbox:has(.radio-checkbox-input[checked]) .radio-checkbox-checkmark {
+    display: block; /* Show when checked */
+    background: #fff;
+    /* Add background to cover any residual styling */
+    z-index: 1;
+    /* Ensure it’s on top */
+}
+
+img {
+    width: 50px;
+    height: 50px;
+}
+
+.ck-content .image-block {
+    float: left;
+}
+/*
+@media screen {
+    .ck-content figure.table.full-table table {
+        border-spacing: 0;
+    }
+}*/
+
+/*****************************************************************************
+ * Printing
+ */
+
+@media print {
+    @page {
+        size: 8.5in 11in;
+        margin: 0in 0in 0in 0in;
+    }
+
+    @page :first {
+        margin-top: 0;
+    }
+
+    /* Print-specific font sizing */
+    .ck-content {
+        font-size: 11pt !important;
+        /* This line height causes text to flow on to the next page in the PDF, when it doesn't in CKEditor. It therefore makes
+         * the pagination lines inaccurate.
+         line-height: 1.2 !important;  /* Better for print */
+        font-family: 'Times New Roman', Times, serif !important;
+    }
+
+    /* Ensure proper page breaks in print */
+    .ck-content .page-break {
+        page-break-before: always !important;
+        break-before: page !important;
+        border: none !important;
+        margin: 0 !important;
+        height: 0 !important;
+    }
+
+    .attention {
+        /* Don't print any of the highlighting. */
+        all: unset;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        display: inline !important;
+    }
+
+    .attention-instruction-model {
+        /* Never print the instructions. Those are for the user filling out the deed only. */
+        display: none !important;
+    }
+
+    /* Hack for the CA funding instructions. Might need to re-think some of these styles and positionInstructionWindow() in 
+     * CKEditorAttentionBox.ts if we ever have other highlighted text that needs to have this style to look right.
+     */
+    .ck-content .ca-funding-instructions td p .attention {
+        display: inline !important;
+    }
+
+    .page-break {
+        border: none;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        page-break-before: always;
+        break-before: page;
+    }
+
+    .page-break::before {
+        content: none;
+    }
+
+    .radio-checkbox {
+        position: relative;
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        vertical-align: top;
+        font-size: 8pt;
+    }
+
+    .radio-checkbox-input {
+        width: 10px;
+        height: 10px;
+        border: 1px solid black;
+        background-color: white;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        margin: 0;
+        box-sizing: border-box;
+        border-radius: 0 !important;
+    }
+
+    .radio-checkbox-checkmark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -40%);
+        width: 10px;
+        height: 10px;
+        font-size: 8pt;
+        /* Size of ✔ */
+        line-height: 10px;
+        /* Center vertically */
+        text-align: center;
+        /* Center horizontally */
+        color: black;
+        pointer-events: none;
+        /* Allow clicks to pass through */
+        display: none;
+        /* Hidden unless checked */
+    }
+
+    .radio-checkbox input.radio-checkbox-input {
+        width: 10px;
+        height: 10px;
+        border: 1px solid black;
+        background-color: white;
+        vertical-align: middle;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .radio-checkbox .radio-checkbox-checkmark {
+        position: relative;
+        top: 50%;
+        left: 50%;
+        /* 
+        I do not know why the translate value needs to be so high, but with position absolute, 
+        the FL Quitclaim deed is different than the PCOR Forms, probably because of the elements they are wrapped in?
+        The relative gets them to require the same values
+        */
+        transform: translate(-50%, -200%);
+        width: 70%;
+        /* slightly smaller than checkbox */
+        height: 70%;
+        color: black;
+        font-size: 8px;
+        line-height: 1;
+    }
+
+    .radio-checkbox:has(.radio-checkbox-input[checked]) .radio-checkbox-checkmark {
+        display: block !important; 
+        /* Show when checked */
+        background: #fff;
+        /* Add background to cover any residual styling */
+        z-index: 1;
+        /* Ensure it’s on top */
+    }
+}
