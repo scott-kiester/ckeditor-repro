@@ -1,7 +1,7 @@
 The project reproduces a problem with the CKEditor pagination plugin, where pagination lines are being drawn too early.
 
 Steps to reproduce:
-1) In the `frontend` directory, create a `.env` file with the folloing: `VITE_CKEDITOR_LICENSE_KEY=<<your-license-key>>`
+1) In the `frontend` directory, create a `.env` file with the following: `VITE_CKEDITOR_LICENSE_KEY=<<your-license-key>>`
 2) Start the backend: `npm run backend`
 3) Start the frontend: `npm run frontend`
 4) Open a browser and navigate to `http://localhost:8009/?file=florida-deed.html`
